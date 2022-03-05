@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,9 +16,9 @@ namespace Play.Infra.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    [Authorize]
     public class ItemsController : ControllerBase
     {
+        private const string AdminRole = "Admin";
         private readonly ILogger<ItemsController> _logger;
 
         private readonly CatalogClient _catalogClient;
@@ -36,9 +38,12 @@ namespace Play.Infra.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<InventoryItemDto>>> GetAsync(Guid userId)
         {
-            if (userId == Guid.Empty)
+            var currentUserIdString = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            var currentUserId = Guid.Parse(currentUserIdString);
+
+            if (currentUserId != userId && !User.IsInRole(AdminRole))
             {
-                return BadRequest();
+                return Forbid();
             }
 
             var catalogItems = await _catalogRepository.GetAllAsync();
@@ -56,6 +61,7 @@ namespace Play.Infra.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = AdminRole)]
         public async Task<ActionResult> CreateAsync(GrantItemDto grantItemRequest)
         {
             if (grantItemRequest.UserId == null || grantItemRequest.UserId == null)
