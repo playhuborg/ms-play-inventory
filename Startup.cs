@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Play.Common.Identity;
 using Play.Common.MassTransit;
 
 namespace Play.Inventory
@@ -27,6 +28,8 @@ namespace Play.Inventory
             services.RegisterRepositories();
             services.RegisterClients(Configuration);
             services.AddMassTransitWithRabbitMQ();
+
+            services.AddJwtBearerAuthentication();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>
@@ -57,6 +60,8 @@ namespace Play.Inventory
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseAuthentication();
 
             app.UseAuthorization();
 

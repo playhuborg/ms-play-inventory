@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Play.Common;
@@ -13,6 +14,7 @@ namespace Play.Infra.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class ItemsController : ControllerBase
     {
         private readonly ILogger<ItemsController> _logger;
@@ -34,7 +36,7 @@ namespace Play.Infra.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<InventoryItemDto>>> GetAsync(Guid userId)
         {
-            if (userId == null)
+            if (userId == Guid.Empty)
             {
                 return BadRequest();
             }
