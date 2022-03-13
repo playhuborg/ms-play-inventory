@@ -19,7 +19,7 @@ namespace Play.Inventory
         public static IServiceCollection RegisterClients(this IServiceCollection services, IConfiguration configuration)
         {
             var urlSettings = configuration.GetSection(nameof(ClientUrls)).Get<ClientUrls>();
-            services.AddHttpClientWithCircuitBerakerConfig<CatalogClient>(new Uri(urlSettings.CatagoryService));
+            services.AddHttpClientWithCircuitBerakerConfig<CatalogClient>(new Uri(urlSettings.CatalogService));
 
             return services;
         }
