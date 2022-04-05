@@ -39,6 +39,10 @@ namespace Play.Infra.Controllers
         public async Task<ActionResult<IEnumerable<InventoryItemDto>>> GetAsync(Guid userId)
         {
             var currentUserIdString = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (currentUserIdString == null)
+            {
+                return Forbid("Cannot find user id");
+            }
             var currentUserId = Guid.Parse(currentUserIdString);
 
             if (currentUserId != userId && !User.IsInRole(AdminRole))
