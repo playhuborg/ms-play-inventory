@@ -14,5 +14,7 @@ namespace Play.Inventory.Entities
         public int Quantity { get; set; }
 
         public DateTimeOffset AcquiredDate { get; set; }
+
+        public Guid CorrelationId { get; set; }
     }
 }
