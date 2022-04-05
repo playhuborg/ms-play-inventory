@@ -68,7 +68,7 @@ namespace Play.Infra.Controllers
         [Authorize(Roles = AdminRole)]
         public async Task<ActionResult> CreateAsync(GrantItemDto grantItemRequest)
         {
-            if (grantItemRequest.UserId == null || grantItemRequest.UserId == null)
+            if (grantItemRequest.UserId == Guid.Empty)
             {
                 return BadRequest();
             }
