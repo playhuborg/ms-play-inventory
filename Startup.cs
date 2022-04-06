@@ -27,6 +27,7 @@ namespace Play.Inventory
 
             services.RegisterRepositories();
             services.RegisterClients(Configuration);
+            services.RegisterServices();
             services.AddMassTransitWithRabbitMQ();
 
             services.AddJwtBearerAuthentication();

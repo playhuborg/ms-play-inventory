@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Play.Common;
 using Play.Inventory;
-using Play.Inventory.Clients;
-using Play.Inventory.Entities;
+using Play.Inventory.Services;
 
 namespace Play.Infra.Controllers
 {
@@ -21,18 +18,12 @@ namespace Play.Infra.Controllers
         private const string AdminRole = "Admin";
         private readonly ILogger<ItemsController> _logger;
 
-        private readonly CatalogClient _catalogClient;
+        private readonly IInventoryService inventoryService;
 
-        IRepository<InventoryItem> _inventoryRepository;
-
-        private readonly IRepository<CatalogItem> _catalogRepository;
-
-        public ItemsController(ILogger<ItemsController> logger, IRepository<InventoryItem> inventoryRepository, CatalogClient catalogClient, IRepository<CatalogItem> catalogRepository)
+        public ItemsController(ILogger<ItemsController> logger, IInventoryService inventoryService)
         {
             _logger = logger;
-            _inventoryRepository = inventoryRepository;
-            _catalogClient = catalogClient;
-            _catalogRepository = catalogRepository;
+            this.inventoryService = inventoryService;
         }
 
         [HttpGet]
@@ -50,16 +41,7 @@ namespace Play.Infra.Controllers
                 return Forbid();
             }
 
-            var catalogItems = await _catalogRepository.GetAllAsync();
-            var testing = await _inventoryRepository.GetAllAsync(item => item.UserId == userId);
-            var inventoryItems = (await _inventoryRepository.GetAllAsync(item => item.UserId == userId))
-                                    .Select(item =>
-                                    {
-                                        var catalogItem = catalogItems.Where(catalog => item.CatalogItemId == catalog.Id).FirstOrDefault();
-                                        if (catalogItem != null)
-                                            return item.AsDto(catalogItem.Name, catalogItem.Description);
-                                        return item.AsDto(null, null);
-                                    });
+            var inventoryItems = await inventoryService.GetInventoryByuser(userId);
 
             return Ok(inventoryItems);
         }
@@ -73,25 +55,7 @@ namespace Play.Infra.Controllers
                 return BadRequest();
             }
 
-            var inventoryItem = await _inventoryRepository.GetAsync(item => item.CatalogItemId == grantItemRequest.CatalogItemId && item.UserId == grantItemRequest.UserId);
-            if (inventoryItem == null)
-            {
-                inventoryItem = new InventoryItem
-                {
-                    CatalogItemId = grantItemRequest.CatalogItemId,
-                    Quantity = grantItemRequest.Quantity,
-                    UserId = grantItemRequest.UserId,
-                    AcquiredDate = DateTimeOffset.Now,
-                    Id = Guid.NewGuid()
-                };
-
-                await _inventoryRepository.CreateAsync(inventoryItem);
-            }
-            else
-            {
-                inventoryItem.Quantity += inventoryItem.Quantity;
-                await _inventoryRepository.UpdateAsync(inventoryItem);
-            }
+            await inventoryService.CreateInventory(grantItemRequest);
             return Ok("Added succesfully");
         }
     }

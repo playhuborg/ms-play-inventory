@@ -6,6 +6,7 @@ using Play.Common.MassTransit;
 using Play.Common.MongoDb;
 using Play.Inventory.Clients;
 using Play.Inventory.Entities;
+using Play.Inventory.Services;
 
 namespace Play.Inventory
 {
@@ -29,6 +30,13 @@ namespace Play.Inventory
             services.AddMongo()
                             .AddRepository<InventoryItem>("inventoryItems")
                             .AddRepository<CatalogItem>("CatalogItems");
+
+            return services;
+        }
+
+        public static IServiceCollection RegisterServices(this IServiceCollection services)
+        {
+            services.AddTransient<IInventoryService, InventoryService>();
 
             return services;
         }
