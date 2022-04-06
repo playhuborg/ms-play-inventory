@@ -42,7 +42,7 @@ namespace Play.Inventory.Services
                 inventoryItem = new InventoryItem
                 {
                     CatalogItemId = grantItemRequest.CatalogItemId,
-                    Quantity = grantItemRequest.Quantity,
+                    Quantity = grantItemRequest.Quantity ?? 0,
                     UserId = grantItemRequest.UserId,
                     AcquiredDate = DateTimeOffset.Now,
                     Id = Guid.NewGuid()
